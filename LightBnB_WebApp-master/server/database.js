@@ -109,7 +109,7 @@ const getAllProperties = function(options, limit = 10) {
   let queryString = `
   SELECT properties.*, avg(property_reviews.rating) as average_rating
   FROM properties
-  JOIN property_reviews ON properties.id = property_id
+  LEFT JOIN property_reviews ON properties.id = property_id
   `;
 
   // 3
@@ -146,11 +146,11 @@ const getAllProperties = function(options, limit = 10) {
   }
   if (options.minimum_rating) {
     if (options.city || options.owner_id || options.minimum_price_per_night || maximum_price_per_night) {
-      queryParams.push(`${options.minimum_rating*100}`);
-      queryString += `AND rating >= $${queryParams.length} `;
+      queryParams.push(`${options.minimum_rating}`);
+      queryString += `AND property_reviews.rating >= $${queryParams.length} `;
     } else {
-      queryParams.push(`${options.minimum_rating*100}`);
-      queryString += `WHERE rating >= $${queryParams.length} `;
+      queryParams.push(`${options.minimum_rating}`);
+      queryString += `WHERE property_reviews.rating >= $${queryParams.length} `;
     }
   }
 
@@ -184,7 +184,7 @@ const addProperty = function(property) {
   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
   RETURNING *
   
-  `, [property.owner_id, property.title, property.description, property.thumbnail_photo_url, property.cover_photo_url, property.cost_per_night, property.street, property.city, property.province, property.post_code, property.country, property.parking_spaces, property.number_of_bathrooms, property.number_of_bedrooms])
+  `, [property.owner_id, property.title, property.description, property.thumbnail_photo_url, property.cover_photo_url, property.cost_per_night*100, property.street, property.city, property.province, property.post_code, property.country, property.parking_spaces, property.number_of_bathrooms, property.number_of_bedrooms])
   .then(res => res.rows);
   
   
